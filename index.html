@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+</head>
+<body>
+<!--PAGE-START-->
+<title>별의 서고</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Gowun+Batang:wght@400;700&family=Gowun+Dodum&display=swap">
+<link rel="stylesheet" href="css/style.css">
+
+<div class="app" id="app">
+  <header class="brand">
+    <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M12 2Q13.6 10.4 22 12Q13.6 13.6 12 22Q10.4 13.6 2 12Q10.4 10.4 12 2Z" fill="#fffbea" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg>
+    <span>별의 서고</span>
+  </header>
+
+  <!-- 1. 생일 입력 -->
+  <section class="screen intro" id="intro" aria-labelledby="intro-title">
+    <div class="fan" id="fan" aria-hidden="true"></div>
+    <p class="eyebrow">생일로 찾는 나의 타로 카드</p>
+    <h1 id="intro-title">네 운은<br>언제 열릴까?</h1>
+
+    <form id="birth-form" class="birth-form" novalidate>
+      <fieldset>
+        <legend>생일</legend>
+        <div class="fields">
+          <label class="field">
+            <select id="month" name="month" aria-label="태어난 달">
+              <option value="">월</option>
+            </select>
+            <span class="unit">월</span>
+          </label>
+          <label class="field">
+            <select id="day" name="day" aria-label="태어난 날">
+              <option value="">일</option>
+            </select>
+            <span class="unit">일</span>
+          </label>
+        </div>
+      </fieldset>
+      <p class="form-msg" id="form-msg" role="status" aria-live="polite"></p>
+      <button type="submit" class="btn primary" id="find">내 카드 찾기</button>
+    </form>
+
+    <div class="examples">
+      <span class="examples-label">예시 생일</span>
+      <div class="chips">
+        <button type="button" class="chip" data-m="11" data-d="5">11월 5일</button>
+        <button type="button" class="chip" data-m="2" data-d="8">2월 8일</button>
+        <button type="button" class="chip" data-m="3" data-d="7">3월 7일</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2. 카드 -->
+  <section class="screen stage" id="stage" hidden aria-label="나의 카드">
+    <div class="stage-top">
+      <button type="button" class="link-btn" id="back">
+        <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M15 5L8 12L15 19" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        다른 생일
+      </button>
+      <p class="chain-mini" id="chain-mini"></p>
+    </div>
+
+    <div class="card-area" id="card-area">
+      <div class="halo" aria-hidden="true"></div>
+      <button type="button" class="card" id="card" aria-label="카드 뒤집기">
+        <span class="card-inner" id="card-inner">
+          <span class="face front" id="face-front"></span>
+          <span class="face back" id="face-back"></span>
+        </span>
+      </button>
+      <div class="burst" id="burst" aria-hidden="true"></div>
+    </div>
+
+    <p class="hint" id="hint">카드를 톡 눌러봐</p>
+    <p class="sr-only" id="announce" aria-live="polite"></p>
+
+    <section class="explain" id="explain" hidden aria-labelledby="explain-title">
+      <h2 id="explain-title">이 카드가 나온 이유</h2>
+      <ol class="chain" id="why-chain"></ol>
+      <p class="range" id="why-range"></p>
+      <ul class="notes" id="why-notes"></ul>
+    </section>
+
+    <div class="actions" id="actions" hidden>
+      <button type="button" class="btn primary wide" id="save">이미지 저장</button>
+    </div>
+  </section>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+</div>
+
+<script src="data/zodiac-ranges.js"></script>
+<script src="data/card-map.js"></script>
+<script src="data/card-content.js"></script>
+<script src="js/lookup.js"></script>
+<script src="js/art.js"></script>
+<script src="js/app.js"></script>
+<!--PAGE-END-->
+</body>
+</html>

@@ -6,7 +6,7 @@
 
   var monthSel = $("month"), daySel = $("day"), msg = $("form-msg");
   var intro = $("intro"), stage = $("stage");
-  var card = $("card"), inner = $("card-inner"), front = $("face-front"), back = $("face-back");
+  var card = $("card"), bob = $("card-bob"), inner = $("card-inner"), front = $("face-front"), back = $("face-back");
   var hint = $("hint"), actions = $("actions"), explain = $("explain"), burst = $("burst"), announce = $("announce");
 
   var state = { info: null, flipped: false, busy: false };
@@ -137,7 +137,7 @@
 
     card.style.setProperty("--accent", palette(info).accent);
     card.className = "card";
-    inner.getAnimations && inner.getAnimations().forEach(function (a) { a.cancel(); });
+    [inner, bob].forEach(function (el) { el.getAnimations && el.getAnimations().forEach(function (a) { if (a.id === "spin" || a.id === "lift") a.cancel(); }); });
     inner.style.transform = "";
     burst.innerHTML = "";
     $("toast").classList.remove("show");
@@ -170,7 +170,6 @@
       setTimeout(function () {
         if (state.info !== info) return;
         card.classList.remove("enter");
-        if (!state.flipped) card.classList.add("float");
         if (info.content && !state.flipped) hint.classList.add("pulse");
       }, reduceMotion ? 0 : 1000);
     });
@@ -204,11 +203,33 @@
     return box;
   }
 
+  /*
+   * 회전 한 번: 카드를 들어 올리는 움직임(bob)과 세로축 회전(inner)을
+   * 따로 움직여 각자 한 곡선으로 부드럽게 흐르게 한다.
+   * 둥실 떠 있는 움직임(float)은 멈추지 않아 탭하는 순간 튀지 않는다.
+   */
+  function spin(from, to, o) {
+    var rot = inner.animate([
+      { transform: "rotateY(" + from + "deg)" },
+      { transform: "rotateY(" + to + "deg)" }
+    ], { id: "spin", duration: o.duration, delay: o.delay, easing: o.easing, fill: "both" });
+    bob.animate([
+      { transform: "translateY(0) scale(1)", easing: "cubic-bezier(.33,0,.2,1)" },
+      { transform: "translateY(" + (-o.lift) + "px) scale(" + o.scale + ")", offset: 0.42, easing: "cubic-bezier(.45,0,.35,1)" },
+      { transform: "translateY(0) scale(1)" }
+    ], { id: "lift", duration: o.delay + o.duration + 120 });
+    return rot.finished.then(function () {
+      var end = ((to % 360) + 360) % 360;
+      inner.style.transform = end ? "rotateY(" + end + "deg)" : "";
+      rot.cancel();
+    });
+  }
+
   function flip(info) {
     state.busy = true; state.flipped = true;
     hint.classList.remove("pulse");
     hint.style.opacity = "0";
-    card.classList.remove("float", "enter");
+    card.classList.remove("enter");
     var resultEl = fillResult(info);   // 결과 문장은 탭한 뒤에야 문서에 들어간다
 
     if (reduceMotion) {
@@ -218,22 +239,12 @@
     }
 
     card.classList.add("flipping", "lighting");
-    var anim = inner.animate([
-      { transform: "translateY(0) rotateY(0deg) scale(1)", easing: "cubic-bezier(.3,.7,.4,1)" },
-      { transform: "translateY(-30px) rotateY(-10deg) scale(1.045)", offset: 0.2, easing: "cubic-bezier(.55,0,.25,1)" },
-      { transform: "translateY(-16px) rotateY(192deg) scale(1.04)", offset: 0.72, easing: "cubic-bezier(.3,0,.3,1)" },
-      { transform: "translateY(-3px) rotateY(176deg) scale(1.01)", offset: 0.86, easing: "ease-in-out" },
-      { transform: "translateY(0) rotateY(180deg) scale(1)" }
-    ], { duration: 1250, fill: "forwards" });
-
-    anim.onfinish = function () {
-      inner.style.transform = "rotateY(180deg)";
-      anim.cancel();
+    spin(0, 180, { duration: 1150, delay: 110, easing: "cubic-bezier(.62,0,.28,1.08)", lift: 26, scale: 1.045 }).then(function () {
       card.classList.remove("flipping");
       card.classList.add("pop");
       popStars();
       setTimeout(done, 140);
-    };
+    });
 
     function done() {
       resultEl.classList.add("shown");
@@ -248,7 +259,6 @@
         explain.hidden = false;
         actions.hidden = false;
         card.setAttribute("aria-label", info.card.roman + " " + info.card.name + " 카드 뒷면. " + info.content.result);
-        card.classList.add("float");
       }, reduceMotion ? 0 : 900);
     }
   }
@@ -256,24 +266,17 @@
   /* 결과를 연 뒤: 누를 때마다 앞면 ↔ 뒷면 */
   function turn(info, toBack) {
     state.busy = true;
-    card.classList.remove("float", "pop");
+    card.classList.remove("pop");
     var from = toBack ? 0 : 180, to = toBack ? 180 : 360;
     function end() {
       state.flipped = toBack;
-      inner.style.transform = toBack ? "rotateY(180deg)" : "";
+      if (reduceMotion) inner.style.transform = toBack ? "rotateY(180deg)" : "";
       hint.textContent = toBack ? "다시 누르면 앞면을 볼 수 있어" : "다시 누르면 뒷면을 볼 수 있어";
       card.setAttribute("aria-label", info.card.roman + " " + info.card.name + (toBack ? " 카드 뒷면. " + info.content.result : " 카드 앞면. 눌러서 뒷면 보기"));
-      card.classList.add("float");
       state.busy = false;
     }
     if (reduceMotion) return end();
-    var anim = inner.animate([
-      { transform: "translateY(0) rotateY(" + from + "deg) scale(1)", easing: "cubic-bezier(.3,.7,.4,1)" },
-      { transform: "translateY(-18px) rotateY(" + (from + 90) + "deg) scale(1.03)", offset: 0.45, easing: "cubic-bezier(.3,0,.3,1)" },
-      { transform: "translateY(-4px) rotateY(" + (to + 6) + "deg) scale(1.01)", offset: 0.8, easing: "ease-in-out" },
-      { transform: "translateY(0) rotateY(" + to + "deg) scale(1)" }
-    ], { duration: 720, fill: "forwards" });
-    anim.onfinish = function () { end(); anim.cancel(); };
+    spin(from, to, { duration: 820, delay: 50, easing: "cubic-bezier(.55,0,.25,1.06)", lift: 14, scale: 1.025 }).then(end);
   }
 
   /* 뒤집힘이 끝나는 순간: 작은 별 세 개 + 빛 알갱이 + 빛 테 */

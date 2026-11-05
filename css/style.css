@@ -195,12 +195,18 @@ legend { padding: 0; margin-bottom: 8px; font-size: 13px; color: var(--ink-soft)
   transform-style: preserve-3d;
   -webkit-user-select: none; user-select: none;
 }
-.card.float { animation: float 3.8s ease-in-out infinite; }
+/* 둥실 떠 있는 움직임은 멈추지 않는다 (탭할 때 튀지 않도록) */
+.card-bob {
+  position: absolute; inset: 0; display: block;
+  transform-style: preserve-3d;
+  animation: float 3.8s ease-in-out infinite;
+}
 @keyframes float { 0%, 100% { translate: 0 0; } 50% { translate: 0 -7px; } }
 
 .card-inner {
   position: absolute; inset: 0;
   display: block;
+  will-change: transform;
   transform-style: preserve-3d;
   border-radius: 5.7cqw;
 }
@@ -384,7 +390,7 @@ legend { padding: 0; margin-bottom: 8px; font-size: 13px; color: var(--ink-soft)
 .toast.show { opacity: 1; transform: translate(-50%, 0); }
 
 @media (prefers-reduced-motion: reduce) {
-  .card.float, .hint.pulse, .card.enter, .card.pop, .card.nudge { animation: none; }
+  .card-bob, .hint.pulse, .card.enter, .card.pop, .card.nudge { animation: none; }
   .card.lighting .rs .rs-star, .card.lighting .rs .rs-glow { animation-duration: .01s; animation-delay: 0s; }
   .b-result.shown .w { animation: none; opacity: 1; }
 }

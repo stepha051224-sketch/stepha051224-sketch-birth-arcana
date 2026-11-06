@@ -286,7 +286,8 @@ body {
   animation: rise .6s cubic-bezier(.2,.8,.2,1) both;
 }
 .reading h2 { margin: 0 0 8px; font-size: 14.5px; font-weight: 700; color: var(--ink); }
-.reading-text { margin: 0; font-size: 14.5px; line-height: 1.85; color: var(--ink); word-break: keep-all; text-wrap: pretty; }
+.reading-text p { margin: 0 0 10px; font-size: 14.5px; line-height: 1.85; color: var(--ink); word-break: keep-all; text-wrap: pretty; }
+.reading-text p:last-child { margin-bottom: 0; }
 .reading-meta { margin: 12px 0 0; padding-top: 10px; border-top: 1px solid #ebe6f4; font-size: 12px; line-height: 1.6; color: var(--ink-faint); word-break: keep-all; }
 
 /* 결과 화면 버튼 두 개 */

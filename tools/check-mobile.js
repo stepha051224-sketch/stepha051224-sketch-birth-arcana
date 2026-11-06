@@ -118,11 +118,11 @@ const URL = process.argv[3] || "http://localhost:8765/";
     await page.click("#find"); await page.waitForTimeout(1100);
     await page.tap("#card", { force: true }); await waitRevealed();
     const r = (await page.textContent("#b-result")).replace(/[\s ]+/g, " ").trim();
-    const t = await page.textContent("#reading-text");
+    const t = await page.$$eval("#reading-text p", ps => ps.map(p => p.textContent).join(" "));
     const n = t.split(/(?<=요\.)\s/).length;
     results.add(r);
     ok((await page.textContent(".b-name")) === en && (await page.textContent(".b-sign")).includes(roman) && (await page.textContent(".b-sign")).includes(sign)
-      && r.includes(",") && r.endsWith(".") && n >= 3 && n <= 4,
+      && r.includes(",") && r.endsWith(".") && n === 6,
       `${m}월 ${d}일: ${roman} ${en} · ${sign} → "${r}" / 해석 ${n}문장`);
     if (m === 10) await page.screenshot({ path: `${OUT}/07-death.png` });
   }

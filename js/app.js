@@ -323,7 +323,15 @@
   /* ---------- 카드 해석 ---------- */
   function renderReading(info) {
     var z = info.zodiac, c = info.card;
-    $("reading-text").textContent = info.content.reading;
+    // 그림과 의미(앞 세 문장) / 일상 장면과 해 볼 일(나머지) 두 문단으로
+    var sents = info.content.reading.split(/(?<=요\.)\s+/), box = $("reading-text");
+    box.innerHTML = "";
+    [sents.slice(0, 3), sents.slice(3)].forEach(function (part) {
+      if (!part.length) return;
+      var p = document.createElement("p");
+      p.textContent = part.join(" ");
+      box.appendChild(p);
+    });
     var meta = info.month + "월 " + info.day + "일 → " + z.name + " → " + c.roman + " · " + c.name + ". 별자리 날짜는 프로토타입용 간이 기준이에요.";
     if (info.boundary) meta += " " + info.month + "월 " + info.day + "일은 " + z.name + "의 경계일이라, 태어난 해와 시각에 따라 이웃 별자리일 수도 있어요.";
     $("reading-meta").textContent = meta;

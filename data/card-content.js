@@ -2,74 +2,48 @@
  * 카드별 콘텐츠 (BIRTH ARCANA 창작 해석)
  *
  * result : 뒷면 결과 문장
- * motif  : 일러스트 주제 (그림 작업 메모)
- * front  : 앞면 이미지 경로. 테두리·별자리 메달·이름 리본까지 들어간 카드 한 장 그림.
+ * motif  : 일러스트 주제 (그림 메모)
+ * front  : 앞면 이미지 경로. 테두리·번호·영문 이름·별자리 문양까지 들어간 카드 한 장 그림 (7:12).
  *          비워 두면(null) "일러스트 준비 중" 앞면을 그린다.
- * back   : 뒷면 위쪽 이미지 경로. 비워 두면 라벤더 빛 무늬를 그린다.
+ * back   : 뒷면 위쪽에 넣는 그림 (앞면 카드 안의 그림 원본). 비워 두면 라벤더 빛 무늬를 그린다.
  *
  * 이미지 파일은 images/cards/ 에 "번호-slug-front.webp", "번호-slug-back.webp" 로 둔다.
  * 결과·뒤집기·저장은 그림이 없어도 모두 동작한다.
  */
-window.BYEOL_CARD_CONTENT = {
-  4: {
-    motif: "별 왕관이 놓인 높은 의자와 곧게 뻗은 홀",
-    result: "흐지부지된 계획에 마감일을 정할 때 일이 한 번에 풀립니다",
-    front: null, back: null
-  },
-  5: {
-    motif: "열쇠 두 개가 걸린 종탑과 울려 퍼지는 종소리",
-    result: "믿을 만한 사람에게 조언을 구할 때 막혔던 길이 열립니다",
-    front: null, back: null
-  },
-  6: {
-    motif: "두 갈래 길 위로 마주 닿는 두 손과 날개",
-    result: "둘 중 하나를 마음 가는 대로 고를 때 더 좋은 쪽이 따라옵니다",
-    front: null, back: null
-  },
-  7: {
-    motif: "달빛 바퀴를 단 작은 마차와 앞으로 뻗은 리본",
-    result: "망설이던 첫걸음을 내디딜 때 속도가 붙기 시작합니다",
-    front: null, back: null
-  },
-  8: {
-    motif: "꽃 화관을 쓴 사자를 부드럽게 쓰다듬는 손",
-    result: "서두르지 않고 한 번 더 기다릴 때 상대가 먼저 손을 내밉니다",
-    front: null, back: null
-  },
-  9: {
-    motif: "별 하나를 담은 등불과 눈 덮인 산길",
-    result: "혼자 조용히 정리하는 시간에 놓쳤던 답이 떠오릅니다",
-    front: null, back: null
-  },
-  11: {
-    motif: "깃털과 별이 균형을 이룬 저울",
-    result: "미뤄 둔 약속을 정확히 지킬 때 믿음이 기회로 돌아옵니다",
-    front: null, back: null
-  },
-  13: {
-    motif: "검은 리본이 풀리며 피어나는 흰 꽃",
-    result: "오래 끌던 일을 끝낼 때 새 기회가 들어옵니다",
-    front: null, back: null
-  },
-  14: {
-    motif: "두 잔 사이를 오가는 물줄기와 무지개",
-    result: "서로 다른 둘을 섞어 볼 때 생각지 못한 조합이 빛납니다",
-    front: null, back: null
-  },
-  15: {
-    motif: "느슨하게 풀린 사슬과 열린 새장",
-    result: "끊지 못한 습관 하나를 내려놓을 때 그 시간이 기회로 바뀝니다",
-    front: null, back: null
-  },
-  17: {
-    motif: "하늘색 밤에 길게 빛을 흘리는 별",
-    result: "좋아하는 걸 보여 줄 때 취향이 맞는 사람이 먼저 다가옵니다",
-    front: null, back: null
-  },
-  18: {
-    motif: "초승달 아래 두 탑 사이로 굽이쳐 흐르는 빛의 강",
-    result: "익숙한 선택지 밖을 살펴볼 때 새 기회가 보입니다",
-    front: "images/cards/18-moon-front.webp",
-    back: "images/cards/18-moon-back.webp"
+(function () {
+  function img(num, slug) {
+    var base = "images/cards/" + (num < 10 ? "0" : "") + num + "-" + slug;
+    return { front: base + "-front.webp", back: base + "-back.webp" };
   }
-};
+  function card(num, slug, motif, result) {
+    var i = img(num, slug);
+    return { motif: motif, result: result, front: i.front, back: i.back };
+  }
+
+  window.BYEOL_CARD_CONTENT = {
+    4: card(4, "emperor", "장미 정원 속 숫양 뿔 왕좌와 붉은 망토",
+      "흐지부지된 계획에 마감일을 정할 때 일이 한 번에 풀립니다"),
+    5: card(5, "hierophant", "빛이 드는 성당 안에 엇갈린 금빛 열쇠 두 개와 백합",
+      "믿을 만한 사람에게 조언을 구할 때 막혔던 길이 열립니다"),
+    6: card(6, "lovers", "장미 넝쿨 정원 문 위로 흩날리는 분홍 리본",
+      "둘 중 하나를 마음 가는 대로 고를 때 더 좋은 쪽이 따라옵니다"),
+    7: card(7, "chariot", "구름 위를 달리는 검은 말과 흰 말, 금빛 마차",
+      "망설이던 첫걸음을 내디딜 때 속도가 붙기 시작합니다"),
+    8: card(8, "strength", "무한 모양 넝쿨 아래 눈을 감고 쉬는 사자와 노란 장미",
+      "서두르지 않고 한 번 더 기다릴 때 상대가 먼저 손을 내밉니다"),
+    9: card(9, "hermit", "눈 덮인 산길 바위 위에 켜진 등불",
+      "혼자 조용히 정리하는 시간에 놓쳤던 답이 떠오릅니다"),
+    11: card(11, "justice", "등나무 꽃 아래 연못에 선 검과 저울, 연꽃",
+      "미뤄 둔 약속을 정확히 지킬 때 믿음이 기회로 돌아옵니다"),
+    13: card(13, "death", "보랏빛 리본이 감긴 흰 장미와 꽃봉오리",
+      "오래 끌던 일을 끝낼 때 새 기회가 들어옵니다"),
+    14: card(14, "temperance", "두 금잔 사이를 흐르는 물과 폭포, 백합과 붓꽃",
+      "서로 다른 둘을 섞어 볼 때 생각지 못한 조합이 빛납니다"),
+    15: card(15, "devil", "끊어진 사슬과 열린 문, 석류와 붉은 보석",
+      "끊지 못한 습관 하나를 내려놓을 때 그 시간이 기회로 바뀝니다"),
+    17: card(17, "star", "밤하늘의 큰 별 아래 유리 온실과 수국",
+      "좋아하는 걸 보여 줄 때 취향이 맞는 사람이 먼저 다가옵니다"),
+    18: card(18, "moon", "초승달 아래 두 탑 사이로 굽이쳐 흐르는 빛의 강",
+      "익숙한 선택지 밖을 살펴볼 때 새 기회가 보입니다")
+  };
+})();

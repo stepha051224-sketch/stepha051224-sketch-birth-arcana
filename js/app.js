@@ -78,7 +78,7 @@
 
   function ringMarkup(mirror) {
     // 카드 가장자리를 따라 위쪽 가운데에서 시계 방향으로 켜지는 별
-    var pts = [], n = 22, inset = 3.2, aspect = 25 / 11;
+    var pts = [], n = 22, inset = 3.2, aspect = 340.158 / 198.425;
     var w = 100 - inset * 2, h = (100 - inset * 2) * aspect, per = 2 * (w + h);
     for (var i = 0; i < n; i++) {
       var s = ((i + 0.5) / n * per + w / 2) % per, x, y;
@@ -380,17 +380,17 @@
     ctx.beginPath(); ctx.moveTo(x + r, y); ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r);
     ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath();
   }
-  function drawCover(ctx, img, x, y, w, h, r) {
+  function drawCover(ctx, img, x, y, w, h, r, fy) {
     var s = Math.max(w / img.width, h / img.height), iw = img.width * s, ih = img.height * s;
     ctx.save(); roundRect(ctx, x, y, w, h, r); ctx.clip();
-    ctx.drawImage(img, x + (w - iw) / 2, y + (h - ih) / 2, iw, ih);
+    ctx.drawImage(img, x + (w - iw) / 2, y + (h - ih) * (fy == null ? 0.5 : fy), iw, ih);
     ctx.restore();
   }
   var FONT_D = '"Mystery Quest", Georgia, serif', FONT_B = '"Noto Sans KR", sans-serif';
 
   function makePNG(info) {
     var c = info.card, ct = info.content, Wc = 1080, Hc = 1920;
-    var cw = 460, ch = Math.round(cw * 25 / 11), cy = 190, fx = 60, bx = 560;
+    var cw = 492, ch = Math.round(cw * 340.158 / 198.425), cy = 180, fx = 36, bx = 552;
     var fontsReady = Promise.all([
       document.fonts.load('40px "Mystery Quest"', "BIRTH ARCANA " + c.en.toUpperCase() + c.roman),
       document.fonts.load('500 40px "Noto Sans KR"', ct.result + info.zodiac.name + "창작 해석"),
@@ -399,7 +399,7 @@
     var frontP = hasFront(info)
       ? imageDataURL(ct.front).then(loadImage)
       : loadImage(svgSrc(sized(Art.frontPlaceholder(info.zodiac.id, c.num), cw * 2, ch * 2)));
-    var bw = cw - 2 * Math.round(cw * 0.075), bh = Math.round(bw * 394 / 254);
+    var bw = cw - 2 * Math.round(cw * 0.075), bh = Math.round(bw * 9 / 8);
     var backP = ct.back
       ? imageDataURL(ct.back).then(loadImage)
       : loadImage(svgSrc(sized(Art.backPlaceholder(info.zodiac.id), bw * 2, bh * 2)));
@@ -423,12 +423,12 @@
       [fx, bx].forEach(function (x) {
         ctx.save();
         ctx.shadowColor = "rgba(61,51,87,0.2)"; ctx.shadowBlur = 40; ctx.shadowOffsetY = 18;
-        roundRect(ctx, x, cy, cw, ch, 20); ctx.fillStyle = "#ffffff"; ctx.fill();
+        roundRect(ctx, x, cy, cw, ch, 23); ctx.fillStyle = "#ffffff"; ctx.fill();
         ctx.restore();
       });
 
       // 앞면
-      drawCover(ctx, frontImg, fx, cy, cw, ch, 20);
+      drawCover(ctx, frontImg, fx, cy, cw, ch, 23);
       if (!hasFront(info)) {
         ctx.fillStyle = "#3d3357"; ctx.font = Math.round(cw * 0.064) + "px " + FONT_D;
         ctx.textBaseline = "middle"; setSpacing(ctx, "1px");
@@ -437,22 +437,22 @@
       }
 
       // 뒷면
-      roundRect(ctx, bx + 0.5, cy + 0.5, cw - 1, ch - 1, 20);
+      roundRect(ctx, bx + 0.5, cy + 0.5, cw - 1, ch - 1, 23);
       ctx.fillStyle = "#ffffff"; ctx.fill(); ctx.strokeStyle = "#c3b8dc"; ctx.lineWidth = 2; ctx.stroke();
-      var px = Math.round(cw * 0.075), ix = bx + px, iy = cy + Math.round(cw * 0.08);
-      drawCover(ctx, backImg, ix, iy, bw, bh, Math.round(cw * 0.03));
+      var px = Math.round(cw * 0.075), ix = bx + px, iy = cy + Math.round(cw * 0.075);
+      drawCover(ctx, backImg, ix, iy, bw, bh, Math.round(cw * 0.03), 0.45);
       var u = cw / 100, yy = iy + bh;
       ctx.fillStyle = "#3d3357"; ctx.font = Math.round(9 * u) + "px " + FONT_D; setSpacing(ctx, "1px");
-      ctx.fillText(c.en.toUpperCase(), bx + cw / 2, yy + 15 * u);
+      ctx.fillText(c.en.toUpperCase(), bx + cw / 2, yy + 13.5 * u);
       setSpacing(ctx, "0px");
       ctx.fillStyle = "#6f6590"; ctx.font = "400 " + Math.round(4 * u) + "px " + FONT_B;
-      ctx.fillText(c.roman + "  " + info.zodiac.name, bx + cw / 2, yy + 21.5 * u);
+      ctx.fillText(c.roman + "  " + info.zodiac.name, bx + cw / 2, yy + 20 * u);
       ctx.fillStyle = "#3d3357"; ctx.font = "500 " + (5.3 * u) + "px " + FONT_B;
-      var bl = balanced(ctx, keepTogether(ct.result), 80 * u), lh = 8.2 * u, mid = yy + 21.5 * u + (cy + ch - 9 * u - (yy + 21.5 * u)) / 2;
+      var bl = balanced(ctx, keepTogether(ct.result), 80 * u), lh = 8.2 * u, mid = yy + 20 * u + (cy + ch - 6 * u - (yy + 20 * u)) / 2;
       bl.forEach(function (ln, i) { ctx.fillText(ln, bx + cw / 2, mid - (bl.length * lh) / 2 + lh * 0.75 + i * lh); });
 
       // 아래: 이름과 결과를 크게
-      var ty = cy + ch + 140;
+      var ty = cy + ch + Math.round((Hc - 70 - (cy + ch) - 300) / 2) + 60;   // 카드 아래 남는 공간의 가운데
       ctx.fillStyle = "#3d3357"; ctx.font = "72px " + FONT_D; setSpacing(ctx, "3px");
       ctx.fillText(c.en.toUpperCase(), Wc / 2, ty);
       setSpacing(ctx, "0px");

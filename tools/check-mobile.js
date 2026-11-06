@@ -40,8 +40,8 @@ const URL = process.argv[3] || "http://localhost:8765/";
   const face = () => page.evaluate(() => { const m = getComputedStyle(document.getElementById("card-inner")).transform; return m === "none" ? "front" : (new DOMMatrix(m).m11 < 0 ? "back" : "front"); });
   const waitRevealed = () => page.waitForFunction(() => !document.getElementById("explain").hidden, null, { timeout: 6000 });
 
-  const cases = [["11월 5일", "전갈자리", "XIII", "Death", "오래 끌던 일을 끝낼 때 새 기회가 들어옵니다", false],
-                 ["2월 8일", "물병자리", "XVII", "The Star", "좋아하는 걸 보여 줄 때 취향이 맞는 사람이 먼저 다가옵니다", false],
+  const cases = [["11월 5일", "전갈자리", "XIII", "Death", "오래 끌던 일을 끝낼 때 새 기회가 들어옵니다", true],
+                 ["2월 8일", "물병자리", "XVII", "The Star", "좋아하는 걸 보여 줄 때 취향이 맞는 사람이 먼저 다가옵니다", true],
                  ["3월 7일", "물고기자리", "XVIII", "The Moon", "익숙한 선택지 밖을 살펴볼 때 새 기회가 보입니다", true]];
   for (const [label, sign, roman, en, result, hasImage] of cases) {
     await page.click(`.chip:has-text("${label}")`);
@@ -54,14 +54,14 @@ const URL = process.argv[3] || "http://localhost:8765/";
     const before = await page.evaluate(() => ({ text: document.getElementById("b-result").textContent, body: document.body.innerText,
       save: getComputedStyle(document.getElementById("save")).visibility, explain: document.getElementById("explain").hidden }));
     ok(before.text === "" && !before.body.includes("기회") && before.save === "hidden" && before.explain, `${label}: 탭 전에는 결과·저장 버튼·설명 박스가 없음`);
-    if (hasImage) await page.screenshot({ path: `${OUT}/03-front.png` });
+    if (roman === "XVIII") await page.screenshot({ path: `${OUT}/03-front.png` });
     await page.tap("#card", { force: true });
-    if (hasImage) { await page.waitForTimeout(560); await page.screenshot({ path: `${OUT}/03b-midflip.png` }); }
+    if (roman === "XVIII") { await page.waitForTimeout(560); await page.screenshot({ path: `${OUT}/03b-midflip.png` }); }
     await waitRevealed();
     ok((await page.textContent("#b-result")).replace(/[\s\u00a0]+/g, " ").trim() === result, `${label}: 뒷면 결과 "${result}"`);
     ok((await page.textContent(".b-name")) === en, `${label}: 뒷면 이름 ${en}`);
     ok(await face() === "back", `${label}: 뒷면이 보임`);
-    if (hasImage) await page.screenshot({ path: `${OUT}/04-back.png` });
+    if (roman === "XVIII") await page.screenshot({ path: `${OUT}/04-back.png` });
     const [dl] = await Promise.all([page.waitForEvent("download"), page.click("#save", { force: true })]);
     const file = `${OUT}/card-${roman}.png`; await dl.saveAs(file);
     const buf = fs.readFileSync(file), w = buf.readUInt32BE(16), h = buf.readUInt32BE(20);
@@ -69,7 +69,7 @@ const URL = process.argv[3] || "http://localhost:8765/";
     ok(await face() === "back", `${label}: 저장 버튼을 눌러도 카드는 뒤집히지 않음`);
     const box = await page.textContent("#explain");
     ok(box.includes(sign) && box.includes("크롤리") && box.includes("창작 해석") && box.includes("간이 기준"), `${label}: 카드 아래 설명 박스`);
-    if (hasImage) { await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight)); await page.screenshot({ path: `${OUT}/05-explain.png` }); await page.evaluate(() => window.scrollTo(0, 0)); }
+    if (roman === "XVIII") { await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight)); await page.screenshot({ path: `${OUT}/05-explain.png` }); await page.evaluate(() => window.scrollTo(0, 0)); }
     await page.tap("#card", { force: true }); await page.waitForTimeout(1000);
     ok(await face() === "front" && (await page.textContent("#hint")).includes("뒷면"), `${label}: 다시 누르면 앞면`);
     await page.tap("#card", { force: true }); await page.waitForTimeout(1000);
@@ -80,6 +80,8 @@ const URL = process.argv[3] || "http://localhost:8765/";
   // 나머지 별자리 대표 날짜: 모두 결과까지 열린다
   const rest = [[1,1,"XV","The Devil"],[4,1,"IV","The Emperor"],[5,1,"V","The Hierophant"],[6,1,"VI","The Lovers"],[7,1,"VII","The Chariot"],[8,1,"VIII","Strength"],[9,1,"IX","The Hermit"],[10,1,"XI","Justice"],[12,1,"XIV","Temperance"]];
   for (const [m, d, roman, en] of rest) {
+    ok(await page.evaluate(n => { const c = window.BYEOL_CARD_CONTENT[n]; return !!(c.front && c.back); }, ({XV:15,IV:4,V:5,VI:6,VII:7,VIII:8,IX:9,XI:11,XIV:14})[roman]), `${roman}: 앞면·뒷면 그림 경로 있음`);
+    if (m === 1) await page.evaluate(() => { window.BYEOL_CARD_CONTENT[15] = Object.assign({}, window.BYEOL_CARD_CONTENT[15], { front: null, back: null }); });
     await enter(String(m).padStart(2, "0"), String(d).padStart(2, "0"));
     await page.waitForTimeout(1100);
     if (m === 1) await page.screenshot({ path: `${OUT}/06-pending-front.png` });
@@ -91,7 +93,7 @@ const URL = process.argv[3] || "http://localhost:8765/";
     if (m === 1) {
       const [dl] = await Promise.all([page.waitForEvent("download"), page.click("#save", { force: true })]);
       await dl.saveAs(`${OUT}/card-XV.png`);
-      ok(dl.suggestedFilename() === "birth-arcana_XV_devil.png", "그림 없는 카드도 이미지 저장 " + dl.suggestedFilename());
+      ok(dl.suggestedFilename() === "birth-arcana_XV_devil.png", "그림을 비운 카드도 준비 중 그림으로 이미지 저장 " + dl.suggestedFilename());
     }
     await page.click("#back");
   }

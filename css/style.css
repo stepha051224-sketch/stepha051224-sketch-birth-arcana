@@ -86,9 +86,9 @@ body.on-input { background: linear-gradient(180deg, var(--paper) 0%, var(--mist)
 .home { align-items: center; justify-content: center; gap: 30px; padding-block: 24px 32px; }
 .wordmark { margin: 0; font-size: clamp(34px, 10.5vw, 44px); text-align: center; text-wrap: balance; }
 .hero {
-  width: min(62vw, 270px, calc((100svh - 300px) * 0.583));
+  width: min(64vw, 280px, calc((100svh - 300px) * 0.5833));
   height: auto;
-  aspect-ratio: 452 / 776;
+  aspect-ratio: 600 / 1028;
   max-width: 100%;
   border-radius: 10px;
   box-shadow: 0 18px 40px rgba(61, 51, 87, .18), 0 2px 6px rgba(61, 51, 87, .1);
@@ -148,10 +148,10 @@ body.on-input { background: linear-gradient(180deg, var(--paper) 0%, var(--mist)
 .stage.shown .halo { opacity: 1; }
 
 .card {
-  --w: min(calc(100vw - 48px), 400px, calc((100svh - 128px) * 0.44));
+  --w: min(calc(100vw - 48px), 400px, calc((100svh - 128px) * 0.5833));
   position: relative;
   width: var(--w);
-  aspect-ratio: 11 / 25;
+  aspect-ratio: 198.425 / 340.158;   /* 카드 그림 원본 비율 (7:12) */
   max-width: 100%;
   cursor: pointer;
   container-type: inline-size;
@@ -170,14 +170,14 @@ body.on-input { background: linear-gradient(180deg, var(--paper) 0%, var(--mist)
 .face {
   position: absolute; inset: 0;
   backface-visibility: hidden; -webkit-backface-visibility: hidden;
-  border-radius: 4.5cqw;
+  border-radius: 5cqw;
   overflow: hidden;
   box-shadow: 0 20px 40px rgba(61,51,87,.2), 0 2px 6px rgba(61,51,87,.12);
 }
 .back { transform: rotateY(180deg); }
 
 /* 앞면 */
-.front { background: #2f2d68; }
+.front { background: #fbf5ea; }
 .front img, .front > svg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
 .front::after {   /* 들어 올릴 때 지나가는 광택 */
   content: ""; position: absolute; inset: -20%;
@@ -205,17 +205,17 @@ body.on-input { background: linear-gradient(180deg, var(--paper) 0%, var(--mist)
   border: 1px solid var(--line);
   box-sizing: border-box;
   display: flex; flex-direction: column; align-items: center;
-  padding: 8cqw 7.5cqw 9cqw;
+  padding: 7.5cqw 7.5cqw 8cqw;
   text-align: center;
 }
 .b-img {
-  position: relative; width: 100%; aspect-ratio: 254 / 394; flex: none;
+  position: relative; width: 100%; aspect-ratio: 8 / 9; flex: none;
   border-radius: 3cqw; overflow: hidden; background: #a9a3e2;
 }
-.b-img img, .b-img > svg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
+.b-img img, .b-img > svg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 50% 45%; display: block; }
 .b-name {
-  margin-top: 6.5cqw;
-  font-family: var(--font-display); font-size: 9cqw; line-height: 1.05;
+  margin-top: 5.5cqw;
+  font-family: var(--font-display); font-size: 8.6cqw; line-height: 1.05;
   text-transform: uppercase; letter-spacing: .03em; color: var(--ink);
 }
 .b-sign { margin-top: 1.4cqw; font-size: 4cqw; color: var(--ink-soft); }

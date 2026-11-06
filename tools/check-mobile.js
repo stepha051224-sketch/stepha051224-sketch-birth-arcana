@@ -52,8 +52,8 @@ const URL = process.argv[3] || "http://localhost:8765/";
     ok(hasImage ? await page.$$eval("#face-front img", e => e.length) === 1 : (await page.textContent(".f-pending")).includes("준비 중"),
       `${label}: 앞면 ${hasImage ? "그림 이미지" : "일러스트 준비 중"}`);
     const before = await page.evaluate(() => ({ text: document.getElementById("b-result").textContent, body: document.body.innerText,
-      save: getComputedStyle(document.getElementById("save")).visibility, explain: document.getElementById("explain").hidden }));
-    ok(before.text === "" && !before.body.includes("기회") && before.save === "hidden" && before.explain, `${label}: 탭 전에는 결과·저장 버튼·설명 박스가 없음`);
+      save: document.getElementById("actions").hidden, explain: document.getElementById("explain").hidden }));
+    ok(before.text === "" && !before.body.includes("기회") && before.save && before.explain, `${label}: 탭 전에는 결과·저장 버튼·설명 박스가 없음`);
     if (roman === "XVIII") await page.screenshot({ path: `${OUT}/03-front.png` });
     await page.tap("#card", { force: true });
     if (roman === "XVIII") { await page.waitForTimeout(560); await page.screenshot({ path: `${OUT}/03b-midflip.png` }); }
@@ -62,11 +62,11 @@ const URL = process.argv[3] || "http://localhost:8765/";
     ok((await page.textContent(".b-name")) === en, `${label}: 뒷면 이름 ${en}`);
     ok(await face() === "back", `${label}: 뒷면이 보임`);
     if (roman === "XVIII") await page.screenshot({ path: `${OUT}/04-back.png` });
-    const [dl] = await Promise.all([page.waitForEvent("download"), page.click("#save", { force: true })]);
+    const [dl] = await Promise.all([page.waitForEvent("download"), page.click("#save")]);
     const file = `${OUT}/card-${roman}.png`; await dl.saveAs(file);
     const buf = fs.readFileSync(file), w = buf.readUInt32BE(16), h = buf.readUInt32BE(20);
     ok(w === 1080 && h === 1920 && dl.suggestedFilename().startsWith("birth-arcana_" + roman), `${label}: 이미지 저장 ${dl.suggestedFilename()} (${w}×${h}, ${Math.round(buf.length / 1024)}KB)`);
-    ok(await face() === "back", `${label}: 저장 버튼을 눌러도 카드는 뒤집히지 않음`);
+    ok(await face() === "back" && !(await page.$("#face-back #save")) && await page.evaluate(() => { const c = document.getElementById("card").getBoundingClientRect(), b = document.getElementById("save").getBoundingClientRect(); return b.top >= c.bottom; }), `${label}: 저장 버튼은 카드 밑에 있고 눌러도 카드는 그대로`);
     const box = await page.textContent("#explain");
     ok(box.includes(sign) && box.includes("크롤리") && box.includes("창작 해석") && box.includes("간이 기준"), `${label}: 카드 아래 설명 박스`);
     if (roman === "XVIII") { await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight)); await page.screenshot({ path: `${OUT}/05-explain.png` }); await page.evaluate(() => window.scrollTo(0, 0)); }
@@ -91,7 +91,7 @@ const URL = process.argv[3] || "http://localhost:8765/";
     const r = (await page.textContent("#b-result")).replace(/\s+/g, " ").trim();
     ok((await page.textContent(".b-name")) === en && (await page.textContent(".b-sign")).includes(roman) && r.endsWith("니다"), `${m}월 ${d}일: ${roman} ${en} → "${r}"`);
     if (m === 1) {
-      const [dl] = await Promise.all([page.waitForEvent("download"), page.click("#save", { force: true })]);
+      const [dl] = await Promise.all([page.waitForEvent("download"), page.click("#save")]);
       await dl.saveAs(`${OUT}/card-XV.png`);
       ok(dl.suggestedFilename() === "birth-arcana_XV_devil.png", "그림을 비운 카드도 준비 중 그림으로 이미지 저장 " + dl.suggestedFilename());
     }

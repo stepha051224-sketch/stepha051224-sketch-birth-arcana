@@ -148,7 +148,7 @@ body.on-input { background: linear-gradient(180deg, var(--paper) 0%, var(--mist)
 .stage.shown .halo { opacity: 1; }
 
 .card {
-  --w: min(calc(100vw - 48px), 400px, calc((100svh - 128px) * 0.5833));
+  --w: min(calc(100vw - 48px), 400px, calc((100svh - 200px) * 0.5833));   /* 카드 밑 저장 버튼까지 한 화면에 */
   position: relative;
   width: var(--w);
   aspect-ratio: 198.425 / 340.158;   /* 카드 그림 원본 비율 (7:12) */
@@ -205,7 +205,7 @@ body.on-input { background: linear-gradient(180deg, var(--paper) 0%, var(--mist)
   border: 1px solid var(--line);
   box-sizing: border-box;
   display: flex; flex-direction: column; align-items: center;
-  padding: 7.5cqw 7.5cqw 8cqw;
+  padding: 7.5cqw 7.5cqw 6cqw;
   text-align: center;
 }
 .b-img {
@@ -223,20 +223,13 @@ body.on-input { background: linear-gradient(180deg, var(--paper) 0%, var(--mist)
 .b-result {
   flex: 1; display: flex; align-items: center; justify-content: center;
   margin: 0; padding: 2cqw 2cqw;
-  font-size: 5.3cqw; font-weight: 500; line-height: 1.55; color: var(--ink);
+  font-size: 5.6cqw; font-weight: 500; line-height: 1.6; color: var(--ink);
   word-break: keep-all; text-wrap: balance;
 }
 .b-text { display: block; }
 .b-result .w { display: inline-block; opacity: 0; }
 .b-result.shown .w { animation: wordIn .7s cubic-bezier(.2,.8,.2,1) both; animation-delay: calc(var(--i) * 60ms); }
 @keyframes wordIn { from { opacity: 0; transform: translateY(.4em); filter: blur(4px); } to { opacity: 1; transform: none; filter: none; } }
-.b-save {
-  flex: none;
-  background: var(--black); color: #fff;
-  font-size: 3.7cqw; height: 9.4cqw; padding: 0 7cqw;
-  visibility: hidden;
-}
-.card.revealed .b-save { visibility: visible; }
 
 /* 테두리 별: 뒤집을 때 차례로 켜졌다가 사라진다 */
 .ring { position: absolute; inset: 0; pointer-events: none; }
@@ -275,6 +268,7 @@ body.on-input { background: linear-gradient(180deg, var(--paper) 0%, var(--mist)
 .burst .dot { border-radius: 50%; background: var(--glow); box-shadow: 0 0 8px 2px rgba(201,188,240,.9); }
 .burst .wave { border: 1.5px solid rgba(201,188,240,.95); box-shadow: 0 0 18px rgba(201,188,240,.8), inset 0 0 18px rgba(201,188,240,.5); }
 
+.actions { display: flex; justify-content: center; margin-top: 10px; animation: rise .6s cubic-bezier(.2,.8,.2,1) both; }
 .hint { margin: 10px 0 0; text-align: center; font-size: 14px; color: var(--ink-soft); min-height: 22px; transition: opacity .4s; }
 .hint.pulse { animation: hintPulse 2.2s ease-in-out infinite; }
 @keyframes hintPulse { 0%, 100% { opacity: .5; } 50% { opacity: 1; } }

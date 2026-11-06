@@ -7,7 +7,7 @@
   var home = $("home"), input = $("input"), stage = $("stage");
   var monthIn = $("month"), dayIn = $("day"), msg = $("form-msg");
   var card = $("card"), bob = $("card-bob"), inner = $("card-inner"), front = $("face-front"), back = $("face-back");
-  var hint = $("hint"), explain = $("explain"), burst = $("burst"), announce = $("announce");
+  var hint = $("hint"), actions = $("actions"), explain = $("explain"), burst = $("burst"), announce = $("announce");
 
   var state = { info: null, flipped: false, revealed: false, busy: false };
 
@@ -116,9 +116,7 @@
       '<div class="b-name">' + c.en + "</div>" +
       '<div class="b-sign"><span class="rn">' + c.roman + "</span>" + info.zodiac.name + "</div>" +
       '<p class="b-result" id="b-result"></p>' +
-      '<button type="button" class="btn b-save" id="save">이미지 저장하기</button>' +
       ringMarkup(true);
-    $("save").addEventListener("click", onSave);
   }
 
   function showCard(info) {
@@ -131,6 +129,7 @@
     burst.innerHTML = "";
     $("toast").classList.remove("show");
     explain.hidden = true;
+    actions.hidden = true;
     announce.textContent = "";
 
     buildFront(info);
@@ -154,8 +153,7 @@
   }
 
   /* ---------- 뒤집기 ---------- */
-  function onCardActivate(e) {
-    if (e && e.target.closest && e.target.closest("#save") && state.flipped) return;   // 저장 버튼은 뒤집지 않는다
+  function onCardActivate() {
     var info = state.info;
     if (!info || state.busy) return;
     if (!state.revealed) flip(info);
@@ -163,7 +161,7 @@
   }
   card.addEventListener("click", onCardActivate);
   card.addEventListener("keydown", function (e) {
-    if ((e.key === "Enter" || e.key === " ") && e.target === card) { e.preventDefault(); onCardActivate(e); }
+    if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onCardActivate(); }
   });
 
   /* "때"처럼 앞말에 붙어 읽히는 말이 줄 첫머리로 떨어지지 않게 붙임표 없는 공백으로 묶는다 */
@@ -235,6 +233,7 @@
         hint.style.opacity = "";
         renderExplain(info);
         explain.hidden = false;
+        actions.hidden = false;
         card.setAttribute("aria-label", info.card.en + " 카드 뒷면. " + info.content.result + ". 눌러서 앞면 보기");
       }, reduceMotion ? 0 : 900);
     }
@@ -472,10 +471,10 @@
     });
   }
 
-  function onSave(e) {
-    e.stopPropagation();
+  $("save").addEventListener("click", onSave);
+  function onSave() {
     var info = state.info, btn = $("save");
-    if (!info || !state.revealed || !state.flipped) return;
+    if (!info || !state.revealed) return;
     btn.disabled = true; btn.textContent = "저장 중…";
     var filename = "birth-arcana_" + info.card.roman + "_" + info.card.slug + ".png";
     makePNG(info).then(function (blob) {

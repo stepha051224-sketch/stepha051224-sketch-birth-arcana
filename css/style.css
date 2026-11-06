@@ -83,7 +83,7 @@ body.on-input { background: linear-gradient(180deg, var(--paper) 0%, var(--mist)
 }
 
 /* ---------- 01 메인 ---------- */
-.home { align-items: center; justify-content: center; gap: 30px; padding-block: 24px 32px; }
+.home { align-items: center; gap: 28px; padding-block: 40px 40px; }
 .wordmark { margin: 0; font-size: clamp(34px, 10.5vw, 44px); text-align: center; text-wrap: balance; }
 .hero {
   width: min(64vw, 280px, calc((100svh - 300px) * 0.5833));
@@ -94,6 +94,27 @@ body.on-input { background: linear-gradient(180deg, var(--paper) 0%, var(--mist)
   box-shadow: 0 18px 40px rgba(61, 51, 87, .18), 0 2px 6px rgba(61, 51, 87, .1);
   animation: rise .9s cubic-bezier(.2,.8,.2,1) both;
 }
+
+/* 메인 아래 소개 */
+.about {
+  width: 100%; max-width: 340px;
+  margin-top: 26px; padding-top: 26px;
+  border-top: 1px solid #ece7f6;
+  display: flex; flex-direction: column; align-items: center; gap: 10px;
+  text-align: center;
+}
+.about p { margin: 0; font-size: 14px; line-height: 1.7; color: var(--ink-soft); word-break: keep-all; text-wrap: pretty; }
+.about-lead { font-size: 16px !important; font-weight: 500; color: var(--ink) !important; }
+.about-title { margin: 18px 0 0; font-size: 14.5px; font-weight: 700; color: var(--ink); }
+.about-example { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 6px; padding-top: 2px; }
+.about-example .node {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 5px 11px; border-radius: 999px;
+  background: var(--mist); color: var(--ink); font-size: 13.5px; font-weight: 500;
+}
+.about-example .rn { font-family: var(--font-display); letter-spacing: .06em; color: var(--ink-soft); }
+.about-example .arrow { color: var(--ink-faint); font-size: 13px; }
+.about-note { font-size: 13px !important; color: var(--ink-faint) !important; }
 
 /* ---------- 02 생일 입력 ---------- */
 .birth-form {

@@ -19,6 +19,9 @@ const URL = process.argv[3] || "http://localhost:8765/";
   await page.waitForTimeout(900);
   await page.screenshot({ path: `${OUT}/01-home.png` });
   ok(await page.isVisible("#home") && (await page.textContent("#home-title")).trim() === "Birth Arcana", "메인: 제목과 카드 그림");
+  { const about = await page.textContent("#about");
+    ok(about.includes("크롤리") && about.includes("라이더–웨이트–스미스") && about.includes("XVIII") && about.includes("내 운이 열리는 순간"), "메인: 아래 소개글"); }
+  await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight)); await page.screenshot({ path: `${OUT}/01b-home-about.png` }); await page.evaluate(() => window.scrollTo(0, 0));
 
   await page.click("#start");
   ok(await page.isVisible("#input"), "메인 → 생일 입력");

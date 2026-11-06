@@ -16,6 +16,21 @@
     ? Promise.resolve(window.claude.use("downloads")).catch(function () { return null; })
     : Promise.resolve(null);
 
+  /* ---------- 익명 집계 (Supabase) ----------
+     카드 번호·별자리·이벤트만 보낸다. 생일은 보내지 않는다. 로컬 확인 중에는 보내지 않는다. */
+  function track(event, info) {
+    var cfg = window.BYEOL_CONFIG || {};
+    if (!cfg.supabaseUrl || !cfg.supabaseKey || !info) return;
+    if (/^(localhost|127\.0\.0\.1)$/.test(location.hostname) || location.protocol === "file:") return;
+    try {
+      fetch(cfg.supabaseUrl + "/rest/v1/byeol_card_events", {
+        method: "POST", keepalive: true,
+        headers: { apikey: cfg.supabaseKey, "Content-Type": "application/json", Prefer: "return=minimal" },
+        body: JSON.stringify({ event: event, card_num: info.card.num, zodiac: info.zodiac.id })
+      }).catch(function () {});
+    } catch (e) { /* 집계 실패는 화면에 영향을 주지 않는다 */ }
+  }
+
   /* ---------- 생일 입력: 월·일 휠 ---------- */
   function range(n, unit) { var a = []; for (var i = 1; i <= n; i++) a.push({ value: i, label: i + unit }); return a; }
   function daysIn(m) { return window.BYEOL_DAYS_IN_MONTH[m - 1]; }   // 연도를 받지 않으므로 2월은 29일까지
@@ -237,6 +252,7 @@
     function done() {
       resultEl.classList.add("shown");
       announce.textContent = info.content.result;
+      track("open", info);
       state.revealed = true;
       card.classList.add("revealed");
       setTimeout(function () {
@@ -512,6 +528,7 @@
         return localSave(blob, filename);
       });
     }).then(function (res) {
+      if (res === "saved") track("save", info);
       toast(res === "declined" ? "저장을 취소했어요" : res === "busy" ? "잠시 후 다시 눌러 주세요" : "이미지를 저장했어요");
     }).catch(function () {
       toast("이미지를 만들지 못했어요. 다시 눌러 주세요");

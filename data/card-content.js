@@ -8,6 +8,7 @@
  * motif   : 그림 메모 (카드 그림에 들어간 것)
  * front   : 앞면 이미지 (테두리·번호·영문 이름·별자리 문양까지 들어간 카드 한 장, 7:12)
  * back    : 뒷면 위쪽 그림 (앞면 카드 안의 그림 원본)
+ * frame   : 카드 테두리 색 (앞면과 같은 색으로 뒷면 테두리·이름을 그린다)
  * 이미지가 비어 있으면(null) 준비 중 그림을 그린다.
  */
 (function () {
@@ -15,9 +16,12 @@
     var base = "images/cards/" + (num < 10 ? "0" : "") + num + "-" + slug;
     return { front: base + "-front.webp", back: base + "-back.webp" };
   }
+  /* 카드 테두리 색 (PDF 앞면 테두리에서 가져옴). 뒷면 테두리와 이름 색에 쓴다. */
+  var FRAME = { 4: "#753e50", 5: "#326355", 6: "#844a65", 7: "#435585", 8: "#896031", 9: "#365b65",
+                11: "#605581", 13: "#504657", 14: "#545f88", 15: "#793852", 17: "#405d8e", 18: "#464b7b" };
   function card(num, slug, o) {
     var i = img(num, slug);
-    return { motif: o.motif, result: o.result, reading: o.reading, front: i.front, back: i.back };
+    return { motif: o.motif, result: o.result, reading: o.reading, front: i.front, back: i.back, frame: FRAME[num] };
   }
 
   window.BYEOL_CARD_CONTENT = {
@@ -33,7 +37,7 @@
     }),
     6: card(6, "lovers", {
       motif: "장미 넝쿨 정원 문 위로 흩날리는 분홍 리본",
-      result: "마음이 끌리는 쪽을 솔직하게 말할 때, 같은 마음인 사람을 만나.",
+      result: "끌리는 쪽을 솔직하게 말할 때, 같은 마음인 사람을 만나.",
       reading: "분홍 리본이 장미 정원의 철문을 감싸고 양쪽으로 길게 흘러가요. 문은 살짝 열려 있고, 그 너머로 꽃잎이 깔린 길 하나가 이어져 있어요. 연인 카드는 여러 갈래 앞에서 남의 기준보다 내 마음이 끌리는 쪽을 고르는 순간을 담고 있어요. 주말 계획을 정할 때, 수업이나 동아리를 고를 때, 함께 먹을 메뉴를 고를 때 ‘아무거나 괜찮아’ 대신 ‘나는 이게 더 좋아’라고 말해 보세요. 솔직하게 꺼낸 취향은 같은 쪽을 원하던 사람이 나를 알아보게 해 주는 신호가 돼요. 이번 주에 작은 선택 하나에서 내 선호를 먼저 말해 보면, 뜻이 맞는 사람과 한 걸음 가까워질 수 있어요."
     }),
     7: card(7, "chariot", {

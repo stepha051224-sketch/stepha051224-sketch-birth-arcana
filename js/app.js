@@ -113,6 +113,7 @@
   function buildBack(info) {
     var c = info.card, ct = info.content;
     var img = ct.back ? '<img src="' + ct.back + '" alt="" draggable="false">' : Art.backPlaceholder(info.zodiac.id);
+    back.style.setProperty("--frame", ct.frame || "#6f6590");
     back.innerHTML =
       '<div class="b-img">' + img + "</div>" +
       '<div class="b-name">' + c.en + "</div>" +
@@ -167,7 +168,7 @@
   });
 
   /* "때"처럼 앞말에 붙어 읽히는 말이 줄 첫머리로 떨어지지 않게 붙임표 없는 공백으로 묶는다 */
-  function keepTogether(text) { return text.replace(/ (때|수|것)(?= |$)/g, "\u00a0$1"); }
+  function keepTogether(text) { return text.replace(/ (때|수|것)(?=[ ,.]|$)/g, "\u00a0$1"); }
 
   /* 한 줄 결과를 쉼표 기준 구절로 나눈다: "익숙한 선택지 밖을 살펴볼 때," / "새 기회가 보여." */
   function clauses(text) { return keepTogether(text).split(/(?<=,) /); }
@@ -413,7 +414,7 @@
     var frontP = hasFront(info)
       ? imageDataURL(ct.front).then(loadImage)
       : loadImage(svgSrc(sized(Art.frontPlaceholder(info.zodiac.id, c.num), cw * 2, ch * 2)));
-    var bw = cw - 2 * Math.round(cw * 0.075), bh = Math.round(bw * 9 / 8);
+    var bw = cw - 2 * Math.round(cw * 0.095), bh = Math.round(bw * 9 / 8);
     var backP = ct.back
       ? imageDataURL(ct.back).then(loadImage)
       : loadImage(svgSrc(sized(Art.backPlaceholder(info.zodiac.id), bw * 2, bh * 2)));
@@ -451,18 +452,24 @@
       }
 
       // 뒷면
-      roundRect(ctx, bx + 0.5, cy + 0.5, cw - 1, ch - 1, 23);
-      ctx.fillStyle = "#ffffff"; ctx.fill(); ctx.strokeStyle = "#c3b8dc"; ctx.lineWidth = 2; ctx.stroke();
-      var px = Math.round(cw * 0.075), ix = bx + px, iy = cy + Math.round(cw * 0.075);
+      // 뒷면: 앞면과 같은 베이지 + 같은 색 이중 테두리
+      var frame = ct.frame || "#6f6590", q = cw / 100;
+      roundRect(ctx, bx, cy, cw, ch, 23); ctx.fillStyle = "#fbf5ea"; ctx.fill();
+      ctx.strokeStyle = frame; ctx.lineWidth = Math.max(1.5, 0.36 * q);
+      roundRect(ctx, bx + 4.29 * q, cy + 4.29 * q, cw - 8.58 * q, ch - 8.58 * q, 4.86 * q); ctx.stroke();
+      ctx.globalAlpha = 0.8; ctx.lineWidth = 1;
+      roundRect(ctx, bx + 6.29 * q, cy + 6.29 * q, cw - 12.58 * q, ch - 12.58 * q, 3.43 * q); ctx.stroke();
+      ctx.globalAlpha = 1;
+      var px = Math.round(cw * 0.095), ix = bx + px, iy = cy + Math.round(cw * 0.095);
       drawCover(ctx, backImg, ix, iy, bw, bh, Math.round(cw * 0.03), 0.45);
       var u = cw / 100, yy = iy + bh;
-      ctx.fillStyle = "#3d3357"; ctx.font = Math.round(9 * u) + "px " + FONT_D; setSpacing(ctx, "1px");
+      ctx.fillStyle = frame; ctx.font = Math.round(8.4 * u) + "px " + FONT_D; setSpacing(ctx, "1px");
       ctx.fillText(c.en.toUpperCase(), bx + cw / 2, yy + 13.5 * u);
       setSpacing(ctx, "0px");
       ctx.fillStyle = "#6f6590"; ctx.font = "400 " + Math.round(4 * u) + "px " + FONT_B;
       ctx.fillText(c.roman + "  " + info.zodiac.name, bx + cw / 2, yy + 20 * u);
-      ctx.fillStyle = "#3d3357"; ctx.font = "500 " + (5.3 * u) + "px " + FONT_B;
-      var bl = resultLines(ctx, ct.result, 80 * u), lh = 8.2 * u, mid = yy + 20 * u + (cy + ch - 6 * u - (yy + 20 * u)) / 2;
+      ctx.fillStyle = "#3d3357"; ctx.font = "500 " + (5 * u) + "px " + FONT_B;
+      var bl = resultLines(ctx, ct.result, 80 * u), lh = 8.2 * u, mid = yy + 20 * u + (cy + ch - 8 * u - (yy + 20 * u)) / 2;
       bl.forEach(function (ln, i) { ctx.fillText(ln, bx + cw / 2, mid - (bl.length * lh) / 2 + lh * 0.75 + i * lh); });
 
       // 아래: 이름과 결과를 크게

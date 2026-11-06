@@ -6,7 +6,7 @@
 </head>
 <body>
 <!--PAGE-START-->
-<title>Birth Arcana</title>
+<title>별의 서고</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -15,27 +15,24 @@
 
 <div class="app" id="app">
 
-  <!-- 01 메인 -->
+  <!-- 01 첫 화면 -->
   <section class="screen home" id="home" aria-labelledby="home-title">
     <h1 class="wordmark" id="home-title">Birth Arcana</h1>
     <img class="hero" src="images/hero.webp" alt="초승달 아래 두 탑 사이로 강이 흐르는 The Moon 카드" width="600" height="1028">
+    <p class="intro" id="intro">별의 서고는 열두 별자리와 타로를 연결하는 상징 체계에서 출발했어요. 생일을 입력하고, 내 별자리에 대응하는 카드 한 장을 열어보세요.</p>
     <button type="button" class="btn primary" id="start">내 카드 찾기</button>
 
-    <div class="about" id="about">
-      <svg class="about-spark" viewBox="0 0 48 48" width="18" height="18" aria-hidden="true"><path d="M24 4Q27 21 44 24Q27 27 24 44Q21 27 4 24Q21 21 24 4Z" fill="#9b86c4"/></svg>
-      <p class="about-lead">태어난 날에 연결된 타로 카드가 있어요</p>
-      <p>별의 서고는 열두 별자리와 타로를 잇는 상징 체계에서 출발했어요. 생일을 입력하고, 내 별자리에 대응하는 카드 한 장을 열어 보세요.</p>
-
-      <h2 class="about-title">카드는 이렇게 정해져요</h2>
-      <p>타로와 점성술을 잇는 한 전통에서는 메이저 아르카나 22장 가운데 12장을 열두 별자리에 하나씩 대응시켜요. 대응은 알레이스터 크롤리의 《A Treatise on Astrology》를, 카드 이름과 번호는 라이더–웨이트–스미스 타로를 따랐어요.</p>
-      <p class="about-example" aria-label="예: 3월 7일, 물고기자리, XVIII 달">
-        <span class="node">3월 7일</span><span class="arrow" aria-hidden="true">→</span><span class="node">물고기자리</span><span class="arrow" aria-hidden="true">→</span><span class="node"><span class="rn">XVIII</span>달</span>
-      </p>
-      <p class="about-note">같은 별자리라면 같은 카드가 열려요.</p>
-
-      <h2 class="about-title">카드를 뒤집으면</h2>
-      <p>‘내 운이 열리는 순간’이 한 문장으로 나타나요. 각 카드의 그림과 상징을 오늘의 말로 풀어 쓴 문장이에요.</p>
-    </div>
+    <details class="faq" id="faq">
+      <summary>
+        <span>카드는 어떻게 정해지나요?</span>
+        <svg class="faq-chev" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M6 9L12 15L18 9" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </summary>
+      <div class="faq-body">
+        <p>타로와 점성술을 연결하는 한 전통에서는 메이저 아르카나 22장 가운데 12장을 열두 별자리에 하나씩 대응시켜요. 별의 서고는 알레이스터 크롤리의 《A Treatise on Astrology》에 실린 별자리 대응표를 따르고, 카드 이름과 번호는 라이더–웨이트–스미스 타로를 기준으로 표기해요.</p>
+        <p>예를 들어 3월 7일은 물고기자리이고, 물고기자리에 대응하는 카드는 XVIII(18) · 달이에요. 같은 별자리라면 같은 카드가 열려요.</p>
+        <p>카드의 결과 문장은 각 그림의 상징을 별의 서고에서 새로 풀어 쓴 해석이에요.</p>
+      </div>
+    </details>
   </section>
 
   <!-- 02 생일 입력 -->
@@ -49,19 +46,21 @@
     </header>
 
     <form class="birth-form" id="birth-form" novalidate>
-      <svg class="spark" viewBox="0 0 48 48" width="52" height="52" aria-hidden="true"><path d="M24 4Q27 21 44 24Q27 27 24 44Q21 27 4 24Q21 21 24 4Z" fill="#9b86c4"/></svg>
-      <h2 class="prompt" id="input-title">태어난 날을 입력하세요</h2>
-      <div class="fields">
-        <label class="field">
-          <span class="field-label">month</span>
-          <input id="month" name="month" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="2" placeholder="03" autocomplete="bday-month" aria-label="태어난 달">
-        </label>
-        <label class="field">
-          <span class="field-label">date</span>
-          <input id="day" name="day" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="2" placeholder="07" autocomplete="bday-day" aria-label="태어난 날">
-        </label>
+      <svg class="spark" viewBox="0 0 48 48" width="44" height="44" aria-hidden="true"><path d="M24 4Q27 21 44 24Q27 27 24 44Q21 27 4 24Q21 21 24 4Z" fill="#9b86c4"/></svg>
+      <h2 class="prompt" id="input-title">태어난 날을 골라 주세요</h2>
+
+      <div class="picker" role="group" aria-labelledby="input-title">
+        <div class="picker-col">
+          <span class="field-label" aria-hidden="true">month</span>
+          <div class="wheel-frame"><div id="month-wheel"></div></div>
+        </div>
+        <div class="picker-col">
+          <span class="field-label" aria-hidden="true">date</span>
+          <div class="wheel-frame"><div id="day-wheel"></div></div>
+        </div>
       </div>
-      <p class="form-msg" id="form-msg" role="status" aria-live="polite"></p>
+      <p class="picked" id="picked" aria-live="polite"></p>
+
       <button type="submit" class="btn primary" id="find">내 카드 찾기</button>
       <div class="examples">
         <span class="examples-label">예시</span>
@@ -75,7 +74,7 @@
   <!-- 03·04 카드 -->
   <section class="screen stage" id="stage" hidden aria-label="나의 카드">
     <header class="bar">
-      <button type="button" class="icon-btn" id="back" aria-label="다른 생일 입력">
+      <button type="button" class="icon-btn" id="back" aria-label="생일 다시 고르기">
         <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M20 12H5M10 6L4 12L10 18" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </button>
       <span class="bar-title">Birth Arcana</span>
@@ -96,17 +95,18 @@
     </div>
 
     <p class="hint" id="hint">카드를 눌러 보세요</p>
-    <div class="actions" id="actions" hidden>
-      <button type="button" class="btn primary" id="save">이미지 저장하기</button>
-    </div>
     <p class="sr-only" id="announce" aria-live="polite"></p>
 
-    <section class="explain" id="explain" hidden aria-labelledby="explain-title">
-      <h2 id="explain-title">이 카드가 나온 이유</h2>
-      <ol class="chain" id="why-chain"></ol>
-      <p class="range" id="why-range"></p>
-      <ul class="notes" id="why-notes"></ul>
+    <section class="reading" id="reading" hidden aria-labelledby="reading-title">
+      <h2 id="reading-title">카드 해석</h2>
+      <p class="reading-text" id="reading-text"></p>
+      <p class="reading-meta" id="reading-meta"></p>
     </section>
+
+    <div class="actions" id="actions" hidden>
+      <button type="button" class="btn primary" id="save">이미지 저장</button>
+      <button type="button" class="btn outline" id="again">다른 생일로 보기</button>
+    </div>
   </section>
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
@@ -117,6 +117,7 @@
 <script src="data/card-content.js"></script>
 <script src="js/lookup.js"></script>
 <script src="js/art.js"></script>
+<script src="js/wheel.js"></script>
 <script src="js/app.js"></script>
 <!--PAGE-END-->
 </body>

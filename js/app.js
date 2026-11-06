@@ -5,9 +5,9 @@
   var reduceMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
   var home = $("home"), input = $("input"), stage = $("stage");
-  var monthIn = $("month"), dayIn = $("day"), msg = $("form-msg");
+  var picked = $("picked");
   var card = $("card"), bob = $("card-bob"), inner = $("card-inner"), front = $("face-front"), back = $("face-back");
-  var hint = $("hint"), actions = $("actions"), explain = $("explain"), burst = $("burst"), announce = $("announce");
+  var hint = $("hint"), actions = $("actions"), reading = $("reading"), burst = $("burst"), announce = $("announce");
 
   var state = { info: null, flipped: false, revealed: false, busy: false };
 
@@ -16,62 +16,64 @@
     ? Promise.resolve(window.claude.use("downloads")).catch(function () { return null; })
     : Promise.resolve(null);
 
-  /* ---------- 화면 전환 ---------- */
-  function show(screen) {
-    [home, input, stage].forEach(function (s) { s.hidden = s !== screen; });
-    document.body.classList.toggle("on-input", screen === input);
-    window.scrollTo(0, 0);
-  }
-  $("start").addEventListener("click", function () { show(input); monthIn.focus(); });
-  $("input-back").addEventListener("click", function () { show(home); });
-  $("back").addEventListener("click", function () {
-    stage.classList.remove("shown");
-    state.info = null;
-    show(input);
-    $("find").focus();
+  /* ---------- 생일 입력: 월·일 휠 ---------- */
+  function range(n, unit) { var a = []; for (var i = 1; i <= n; i++) a.push({ value: i, label: i + unit }); return a; }
+  function daysIn(m) { return window.BYEOL_DAYS_IN_MONTH[m - 1]; }   // 연도를 받지 않으므로 2월은 29일까지
+
+  var dayWheel;
+  var wantDay = 1;   // 사용자가 직접 고른 일. 달을 굴리며 2월을 지나가도 기억해 둔다
+  var monthWheel = ByeolWheel($("month-wheel"), {
+    items: range(12, "월"), value: 1, label: "태어난 달",
+    onChange: function (m) {
+      // 달이 바뀌면 일의 범위를 맞춘다. 1월 31일 → 4월이면 4월 30일
+      var max = daysIn(m);
+      dayWheel.setItems(range(max, "일"), Math.min(wantDay, max));
+      showPicked();
+    }
+  });
+  dayWheel = ByeolWheel($("day-wheel"), {
+    items: range(31, "일"), value: 1, label: "태어난 날",
+    onChange: function (d) { wantDay = d; showPicked(); }
   });
 
-  /* ---------- 생일 입력 ---------- */
-  function setMsg(t, field) {
-    msg.textContent = t || "";
-    monthIn.removeAttribute("aria-invalid"); dayIn.removeAttribute("aria-invalid");
-    if (field) field.setAttribute("aria-invalid", "true");
+  function showPicked() { picked.textContent = monthWheel.value() + "월 " + dayWheel.value() + "일"; }
+  function setDate(m, d, smooth) {
+    wantDay = d;
+    monthWheel.set(m, smooth);
+    dayWheel.setItems(range(daysIn(m), "일"), Math.min(d, daysIn(m)));
+    showPicked();
   }
-  function digitsOnly(el) { el.value = el.value.replace(/\D/g, "").slice(0, 2); }
-  monthIn.addEventListener("input", function () {
-    digitsOnly(monthIn); setMsg("");
-    var v = monthIn.value;
-    if (v.length === 2 || (v.length === 1 && +v > 1)) dayIn.focus();   // 두 자리, 또는 2~9월이면 바로 일로
-  });
-  dayIn.addEventListener("input", function () { digitsOnly(dayIn); setMsg(""); });
-  dayIn.addEventListener("keydown", function (e) { if (e.key === "Backspace" && !dayIn.value) monthIn.focus(); });
+  showPicked();
 
-  function pad(n) { return (n < 10 ? "0" : "") + n; }
   Array.prototype.forEach.call(document.querySelectorAll(".chip"), function (b) {
-    b.addEventListener("click", function () {
-      monthIn.value = pad(+b.dataset.m); dayIn.value = pad(+b.dataset.d); setMsg("");
-    });
+    b.addEventListener("click", function () { setDate(+b.dataset.m, +b.dataset.d, true); });
   });
-
-  function validate() {
-    var m = parseInt(monthIn.value, 10), d = parseInt(dayIn.value, 10);
-    if (!monthIn.value) return setMsg("태어난 달을 입력하세요.", monthIn);
-    if (!(m >= 1 && m <= 12)) return setMsg("달은 1부터 12까지 입력할 수 있어요.", monthIn);
-    if (!dayIn.value) return setMsg("태어난 날을 입력하세요.", dayIn);
-    var max = window.BYEOL_DAYS_IN_MONTH[m - 1];
-    if (!(d >= 1 && d <= max)) return setMsg(m + "월은 " + max + "일까지 있어요. 날짜를 다시 확인해 주세요.", dayIn);
-    if (!L.isValidMonthDay(m, d)) return setMsg("없는 날짜예요. 다시 확인해 주세요.", dayIn);
-    return { m: m, d: d };
-  }
 
   $("birth-form").addEventListener("submit", function (e) {
     e.preventDefault();
-    var v = validate();
-    if (!v) return;
-    var info = L.lookup(v.m, v.d);
-    if (!info) { setMsg("별자리를 찾지 못했어요. 날짜를 다시 확인해 주세요."); return; }
+    var m = monthWheel.value(), d = dayWheel.value();
+    var info = L.isValidMonthDay(m, d) && L.lookup(m, d);
+    if (!info) { picked.textContent = "날짜를 다시 골라 주세요."; return; }
     showCard(info);
   });
+
+  /* ---------- 화면 전환 ---------- */
+  function show(screen) {
+    [home, input, stage].forEach(function (s) { s.hidden = s !== screen; });
+    window.scrollTo(0, 0);
+    if (screen === input) { monthWheel.refresh(); dayWheel.refresh(); }   // 숨어 있던 휠의 위치를 다시 맞춘다
+  }
+  function toInput() {
+    $("toast").classList.remove("show");
+    stage.classList.remove("shown");
+    state.info = null;
+    show(input);                     // 휠에는 직전에 고른 값이 남아 있다
+    $("month-wheel").focus({ preventScroll: true });
+  }
+  $("start").addEventListener("click", function () { show(input); });
+  $("input-back").addEventListener("click", function () { show(home); });
+  $("back").addEventListener("click", toInput);
+  $("again").addEventListener("click", toInput);
 
   /* ---------- 카드 만들기 ---------- */
   function hasFront(info) { return !!(info.content && info.content.front); }
@@ -128,7 +130,7 @@
     inner.style.transform = "";
     burst.innerHTML = "";
     $("toast").classList.remove("show");
-    explain.hidden = true;
+    reading.hidden = true;
     actions.hidden = true;
     announce.textContent = "";
 
@@ -167,18 +169,28 @@
   /* "때"처럼 앞말에 붙어 읽히는 말이 줄 첫머리로 떨어지지 않게 붙임표 없는 공백으로 묶는다 */
   function keepTogether(text) { return text.replace(/ (때|수|것)(?= |$)/g, "\u00a0$1"); }
 
+  /* 한 줄 결과를 쉼표 기준 구절로 나눈다: "익숙한 선택지 밖을 살펴볼 때," / "새 기회가 보여." */
+  function clauses(text) { return keepTogether(text).split(/(?<=,) /); }
+
   function fillResult(info) {
     var box = $("b-result");
     box.innerHTML = "";
     var el = document.createElement("span");
     el.className = "b-text";
     box.appendChild(el);
-    keepTogether(info.content.result).split(" ").forEach(function (word, i, arr) {
-      var s = document.createElement("span");
-      s.className = "w"; s.style.setProperty("--i", i);
-      s.textContent = word;
-      el.appendChild(s);
-      if (i < arr.length - 1) el.appendChild(document.createTextNode(" "));
+    var i = 0;
+    clauses(info.content.result).forEach(function (part, ci, parts) {
+      var c = document.createElement("span");
+      c.className = "clause";
+      part.split(" ").forEach(function (word, wi, words) {
+        var s = document.createElement("span");
+        s.className = "w"; s.style.setProperty("--i", i++);
+        s.textContent = word;
+        c.appendChild(s);
+        if (wi < words.length - 1) c.appendChild(document.createTextNode(" "));
+      });
+      el.appendChild(c);
+      if (ci < parts.length - 1) el.appendChild(document.createTextNode(" "));
     });
     return box;
   }
@@ -231,8 +243,8 @@
         card.classList.remove("pop", "lighting");
         hint.textContent = "다시 누르면 앞면을 볼 수 있어요";
         hint.style.opacity = "";
-        renderExplain(info);
-        explain.hidden = false;
+        renderReading(info);
+        reading.hidden = false;
         actions.hidden = false;
         card.setAttribute("aria-label", info.card.en + " 카드 뒷면. " + info.content.result + ". 눌러서 앞면 보기");
       }, reduceMotion ? 0 : 900);
@@ -308,24 +320,13 @@
     setTimeout(function () { burst.innerHTML = ""; }, 1500);
   }
 
-  /* ---------- 카드 아래 설명 박스 ---------- */
-  function fmt(md) { return md[0] + "월 " + md[1] + "일"; }
-  function renderExplain(info) {
+  /* ---------- 카드 해석 ---------- */
+  function renderReading(info) {
     var z = info.zodiac, c = info.card;
-    $("why-chain").innerHTML =
-      '<li><span class="node">' + info.month + "월 " + info.day + "일</span></li>" +
-      '<li><span class="arrow" aria-hidden="true">→</span><span class="node">' + Art.glyphSVG(z.id, "#3d3357", 15, 1.8) + z.name + "</span></li>" +
-      '<li><span class="arrow" aria-hidden="true">→</span><span class="node"><span class="rn">' + c.roman + "</span>" + c.name + "</span></li>";
-    $("why-chain").setAttribute("aria-label", info.month + "월 " + info.day + "일, " + z.name + ", " + c.roman + " " + c.name);
-    $("why-range").textContent = z.name + " 구간: " + fmt(z.start) + " ~ " + fmt(z.end);
-    var notes = [];
-    if (info.boundary) {
-      notes.push('<li class="warn">' + info.month + "월 " + info.day + "일은 " + z.name + "가 시작되거나 끝나는 경계일이에요. 실제 별자리는 태어난 해와 시각에 따라 이웃 별자리일 수도 있어요.</li>");
-    }
-    notes.push("<li>별자리 날짜는 프로토타입용 간이 기준이에요. 실제 경계일은 해마다 하루쯤 달라질 수 있어요.</li>");
-    notes.push("<li>별자리와 카드의 짝은 알레이스터 크롤리의 <cite>《A Treatise on Astrology》</cite>에 실린 대응을 따랐어요. 번호와 이름은 라이더–웨이트–스미스 덱 기준이에요.</li>");
-    notes.push("<li>결과 문장은 카드의 상징을 바탕으로 쓴 창작 해석이에요.</li>");
-    $("why-notes").innerHTML = notes.join("");
+    $("reading-text").textContent = info.content.reading;
+    var meta = info.month + "월 " + info.day + "일 → " + z.name + " → " + c.roman + " · " + c.name + ". 별자리 날짜는 프로토타입용 간이 기준이에요.";
+    if (info.boundary) meta += " " + info.month + "월 " + info.day + "일은 " + z.name + "의 경계일이라, 태어난 해와 시각에 따라 이웃 별자리일 수도 있어요.";
+    $("reading-meta").textContent = meta;
   }
 
   /* ---------- 이미지 저장 (앞면 + 뒷면, 세로 PNG) ---------- */
@@ -368,6 +369,12 @@
     });
     if (line) lines.push(line);
     return lines;
+  }
+  /* 구절마다 한 줄에 들어가면 쉼표에서 줄을 바꾸고, 아니면 고르게 나눈다 */
+  function resultLines(ctx, text, maxW) {
+    var parts = clauses(text);
+    if (parts.length > 1 && parts.every(function (p) { return ctx.measureText(p).width <= maxW; })) return parts;
+    return balanced(ctx, keepTogether(text), maxW);
   }
   function balanced(ctx, text, maxW) {
     var lines = wrapLines(ctx, text, maxW), w = maxW;
@@ -447,7 +454,7 @@
       ctx.fillStyle = "#6f6590"; ctx.font = "400 " + Math.round(4 * u) + "px " + FONT_B;
       ctx.fillText(c.roman + "  " + info.zodiac.name, bx + cw / 2, yy + 20 * u);
       ctx.fillStyle = "#3d3357"; ctx.font = "500 " + (5.3 * u) + "px " + FONT_B;
-      var bl = balanced(ctx, keepTogether(ct.result), 80 * u), lh = 8.2 * u, mid = yy + 20 * u + (cy + ch - 6 * u - (yy + 20 * u)) / 2;
+      var bl = resultLines(ctx, ct.result, 80 * u), lh = 8.2 * u, mid = yy + 20 * u + (cy + ch - 6 * u - (yy + 20 * u)) / 2;
       bl.forEach(function (ln, i) { ctx.fillText(ln, bx + cw / 2, mid - (bl.length * lh) / 2 + lh * 0.75 + i * lh); });
 
       // 아래: 이름과 결과를 크게
@@ -462,7 +469,7 @@
       ctx.fillText(label, Wc / 2 - (gs + 10 + lw) / 2 + gs + 10, ty + 66);
       ctx.textAlign = "center";
       ctx.fillStyle = "#3d3357"; ctx.font = "500 50px " + FONT_B;
-      balanced(ctx, keepTogether(ct.result), 860).forEach(function (ln, i) { ctx.fillText(ln, Wc / 2, ty + 170 + i * 76); });
+      resultLines(ctx, ct.result, 860).forEach(function (ln, i) { ctx.fillText(ln, Wc / 2, ty + 170 + i * 76); });
 
       ctx.fillStyle = "rgba(111,101,144,0.75)"; ctx.font = "400 22px " + FONT_B;
       ctx.fillText("결과 문장은 카드의 상징을 바탕으로 쓴 창작 해석이에요", Wc / 2, Hc - 48);
@@ -493,7 +500,7 @@
       toast(res === "declined" ? "저장을 취소했어요" : res === "busy" ? "잠시 후 다시 눌러 주세요" : "이미지를 저장했어요");
     }).catch(function () {
       toast("이미지를 만들지 못했어요. 다시 눌러 주세요");
-    }).then(function () { btn.disabled = false; btn.textContent = "이미지 저장하기"; });
+    }).then(function () { btn.disabled = false; btn.textContent = "이미지 저장"; });
   }
 
   function localSave(blob, filename) {
